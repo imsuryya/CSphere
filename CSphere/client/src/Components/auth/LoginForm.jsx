@@ -136,6 +136,11 @@ export default function LoginForm() {
           Terms of Service
         </Link>
       </p>
+      <div className="text-right mt-1">
+        <Link to="/forgot-password" className="text-sm text-gray-600 hover:underline">
+          Forgot password?
+        </Link>
+      </div>
     </div>
   );
 }
