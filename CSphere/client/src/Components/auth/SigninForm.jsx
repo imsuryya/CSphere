@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile, sendEmailVerification } from "firebase/auth";
 import { auth } from "../../firebase/config";
 
 export default function SigninForm() {
@@ -26,7 +26,16 @@ export default function SigninForm() {
         displayName: `${firstName} ${lastName}`
       });
       
-      navigate("/dashboard"); // Redirect to dashboard after successful signup
+      // Send verification email
+      await sendEmailVerification(userCredential.user, {
+        url: window.location.origin + '/dashboard', // Redirect URL after verification
+        handleCodeInApp: true,
+      });
+      
+      // Store email in session storage for verify email page
+      sessionStorage.setItem('userEmail', email);
+      
+      navigate("/verify-email"); // Redirect to verification page
     } catch (error) {
       setError(error.message);
       console.error("Error signing up:", error);
@@ -42,7 +51,7 @@ export default function SigninForm() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      navigate("/dashboard"); // Redirect to dashboard after successful login
+      navigate("/dashboard"); // Google accounts are pre-verified
     } catch (error) {
       setError(error.message);
       console.error("Error signing in with Google:", error);

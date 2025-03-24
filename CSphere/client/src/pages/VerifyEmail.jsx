@@ -1,9 +1,32 @@
 // src/pages/VerifyEmail.jsx
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { 
+  applyActionCode, 
+  sendEmailVerification, 
+   
+} from "firebase/auth";
+import { auth } from "../firebase/config";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function VerifyEmail() {
-  const [code, setCode] = useState(["", "", "", ""]);
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    // Get email from session storage
+    const storedEmail = sessionStorage.getItem('userEmail');
+    if (storedEmail) {
+      setEmail(storedEmail);
+    } else if (currentUser?.email) {
+      setEmail(currentUser.email);
+    }
+  }, [currentUser]);
 
   const handleChange = (index, value) => {
     if (value.length > 1) return; // Prevent multiple digits
@@ -13,7 +36,7 @@ export default function VerifyEmail() {
     setCode(newCode);
 
     // Auto-focus next input
-    if (value && index < 3) {
+    if (value && index < 5) {
       const nextInput = document.querySelector(`input[name="code-${index + 1}"]`);
       if (nextInput) nextInput.focus();
     }
@@ -26,15 +49,66 @@ export default function VerifyEmail() {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const verificationCode = code.join("");
-    // Handle verification logic here
-    console.log("Verifying code:", verificationCode);
+    if (verificationCode.length !== 6) {
+      setError("Please enter the complete 6-digit code");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      // Verify code
+      await applyActionCode(auth, verificationCode);
+      
+      setMessage("Email verified successfully! Redirecting to dashboard...");
+      
+      // Clear stored email
+      sessionStorage.removeItem('userEmail');
+      
+      // Redirect to dashboard after small delay
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
+    } catch (error) {
+      setError(error.message || "Failed to verify email. Please try again.");
+      console.error("Verification error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleResendCode = () => {
-    // Handle resend logic here
-    console.log("Resending code");
+  const handleResendCode = async () => {
+    if (!currentUser && !email) {
+      setError("No email found. Please try signing in again.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      // If currentUser exists, use it; otherwise try to get the user from auth state
+      const user = currentUser || auth.currentUser;
+      
+      if (user) {
+        await sendEmailVerification(user, {
+          url: window.location.origin + '/dashboard',
+          handleCodeInApp: true,
+        });
+        setMessage("Verification code has been resent to your email");
+      } else {
+        setError("You need to be logged in to resend the verification code");
+      }
+    } catch (error) {
+      setError(error.message || "Failed to resend code. Please try again.");
+      console.error("Resend code error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,8 +121,23 @@ export default function VerifyEmail() {
             </svg>
           </div>
           <h2 className="text-xl font-semibold">Verify Your Email</h2>
-          <p className="text-sm text-gray-500">We&apos;ve sent a code to your email. Enter it below to verify your account.</p>
+          <p className="text-sm text-gray-500">
+            We&apos;ve sent a code to {email || "your email"}. Enter it below to verify your account.
+          </p>
         </div>
+
+        {error && (
+          <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+
+        {message && (
+          <div className="mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+            <span className="block sm:inline">{message}</span>
+          </div>
+        )}
+
         <div className="mt-6">
           <div className="flex gap-2 justify-center my-4">
             {code.map((digit, index) => (
@@ -66,17 +155,22 @@ export default function VerifyEmail() {
             ))}
           </div>
           <button 
-            className="w-full py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+            className="w-full py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
             onClick={handleVerify}
+            disabled={loading}
           >
-            Verify
+            {loading ? "Verifying..." : "Verify"}
           </button>
         </div>
         <div className="mt-4 text-sm text-center space-y-2">
           <div className="text-gray-600">
             Didn&apos;t receive the code?{" "}
-            <button onClick={handleResendCode} className="text-black hover:underline">
-              Resend code
+            <button 
+              onClick={handleResendCode} 
+              className="text-black hover:underline disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? "Sending..." : "Resend code"}
             </button>
           </div>
           <div className="text-gray-600">
