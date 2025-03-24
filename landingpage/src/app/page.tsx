@@ -21,9 +21,6 @@ export default function LandingPage() {
               <Link href="#about" className="text-sm font-medium text-gray-700 hover:text-orange-500">
                 About
               </Link>
-              <Link href="#pricing" className="text-sm font-medium text-gray-700 hover:text-orange-500">
-                Pricing
-              </Link>
               <Link href="#contact" className="text-sm font-medium text-gray-700 hover:text-orange-500">
                 Contact
               </Link>
@@ -61,6 +58,40 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Features Section */}
+      <section id="features" className="py-16 md:py-24">
+        <div className="container px-4 md:px-6">
+          <div className="mx-auto max-w-6xl">
+            <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 md:text-4xl">
+              Features that make a difference
+            </h2>
+            <div className="grid gap-8 md:grid-cols-3">
+              {[
+                {
+                  title: "Seamless Integration",
+                  description: "Connect with your favorite tools and services without any hassle.",
+                },
+                {
+                  title: "Advanced Analytics",
+                  description: "Gain valuable insights with our comprehensive analytics dashboard.",
+                },
+                {
+                  title: "Secure & Reliable",
+                  description: "Your data is protected with enterprise-grade security measures.",
+                },
+              ].map((feature, index) => (
+                <div key={index} className="rounded-xl bg-white p-6 shadow-sm">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
+                    <div className="h-6 w-6 rounded-full bg-orange-500" />
+                  </div>
+                  <h3 className="mb-2 text-xl font-bold">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* About Section */}
       <section id="about" className="py-16 md:py-24 bg-white/50">
@@ -88,63 +119,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-16 md:py-24">
-        <div className="container px-4 md:px-6">
-          <div className="mx-auto max-w-6xl">
-            <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 md:text-4xl">
-              Simple, transparent pricing
-            </h2>
-            <div className="grid gap-8 md:grid-cols-3">
-              {[
-                {
-                  name: "Starter",
-                  price: "$9",
-                  description: "Perfect for individuals and small projects",
-                  features: ["5 Projects", "Basic Analytics", "24/7 Support"],
-                },
-                {
-                  name: "Professional",
-                  price: "$29",
-                  description: "Ideal for growing businesses and teams",
-                  features: ["Unlimited Projects", "Advanced Analytics", "Priority Support", "Team Collaboration"],
-                },
-                {
-                  name: "Enterprise",
-                  price: "$99",
-                  description: "For large organizations with complex needs",
-                  features: ["Custom Solutions", "Dedicated Account Manager", "SLA Guarantees", "Advanced Security"],
-                },
-              ].map((plan, index) => (
-                <div
-                  key={index}
-                  className={`rounded-xl p-6 ${index === 1 ? "bg-orange-50 ring-1 ring-orange-200" : "bg-white"} shadow-sm`}
-                >
-                  <h3 className="mb-2 text-xl font-bold">{plan.name}</h3>
-                  <div className="mb-4">
-                    <span className="text-3xl font-bold">{plan.price}</span>
-                    <span className="text-gray-600">/month</span>
-                  </div>
-                  <p className="mb-6 text-gray-600">{plan.description}</p>
-                  <ul className="mb-6 space-y-2">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center">
-                        <div className="mr-2 h-4 w-4 rounded-full bg-orange-500" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    className={`w-full ${index === 1 ? "bg-orange-500 text-white hover:bg-orange-600" : "bg-white text-orange-500 border border-orange-200 hover:bg-orange-50"}`}
-                  >
-                    Get Started
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+    
 
       {/* Contact Section */}
       <section id="contact" className="py-16 md:py-24 bg-white/50">
@@ -243,11 +218,6 @@ export default function LandingPage() {
                   </li>
                   <li>
                     <Link href="#" className="text-gray-600 hover:text-orange-500">
-                      Pricing
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#" className="text-gray-600 hover:text-orange-500">
                       Integrations
                     </Link>
                   </li>
@@ -318,3 +288,4 @@ export default function LandingPage() {
     </div>
   )
 }
+
