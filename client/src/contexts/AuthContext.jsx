@@ -1,7 +1,8 @@
 // Updated AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import { auth } from "../firebase/config";
-import { onAuthStateChanged, sendEmailVerification } from "firebase/auth";
+import { onAuthStateChanged, sendEmailVerification, signOut } from "firebase/auth";
+import PropTypes from 'prop-types';
 
 const AuthContext = createContext();
 
@@ -23,6 +24,11 @@ export function AuthProvider({ children }) {
     });
   };
 
+  // Function to logout the user
+  const logout = async () => {
+    return signOut(auth);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -36,6 +42,7 @@ export function AuthProvider({ children }) {
     currentUser,
     loading,
     sendVerificationEmail,
+    logout
   };
 
   return (
@@ -44,3 +51,7 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired
+};

@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "bootstrap-icons": "^1.11.3",
     "dotenv": "^16.4.7",
     "firebase": "^11.5.0",
     "firebase-functions": "^6.3.2",
@@ -18,7 +19,9 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-firebase-hooks": "^5.1.1",
-    "react-router-dom": "^7.2.0"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.2.0",
+    "react-syntax-highlighter": "^15.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, User } from "lucide-react"
+import { Search } from "lucide-react"
 import { agents, filterAgents } from "../data/agents"
+import LogoutButton from "../components/auth/LogoutButton"
 
 const Dashboard = () => {
   const [filteredAgents, setFilteredAgents] = useState(agents)
@@ -45,15 +46,13 @@ const Dashboard = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="p-2 rounded-full hover:bg-orange-100">
-            <User size={20} className="text-gray-700" />
-          </button>
+          <LogoutButton />
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-12 max-w-6xl">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-2">AI Agents</h2>
+          <h2 className="text-4xl font-bold mb-2">Programming Experts</h2>
           <p className="text-gray-600">Select an agent to start a conversation</p>
         </div>
 
@@ -64,8 +63,8 @@ const Dashboard = () => {
               className="bg-white rounded-xl shadow-sm border border-orange-100 overflow-hidden transition-all hover:shadow-md"
             >
               <div className="p-6 flex flex-col items-center">
-                <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                  <img src={agent.avatar || "/placeholder.svg"} alt={agent.name} className="rounded-full w-20 h-20" />
+                <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mb-4 overflow-hidden">
+                  <img src={agent.avatar} alt={agent.name} className="w-24 h-24 object-cover" />
                 </div>
 
                 <h3 className="text-xl font-semibold text-center mb-1">{agent.name}</h3>
@@ -75,7 +74,7 @@ const Dashboard = () => {
                   onClick={() => handleSelectAgent(agent.id)}
                   className="w-full py-2 bg-white border border-orange-200 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-medium"
                 >
-                  Use Agent
+                  Chat About {agent.language}
                 </button>
               </div>
             </div>

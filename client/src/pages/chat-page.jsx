@@ -3,6 +3,8 @@ import { useState, useRef, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Send, ExternalLink, Youtube, User, Plus } from "lucide-react"
 import { getAgentById } from "../data/agents"
+import { sendMessageToGemini } from "../services/geminiService"
+import { fetchResources, processYouTubeVideos } from "../services/tavilyService"
 
 const ChatPage = () => {
   const { agentId } = useParams()
@@ -10,13 +12,11 @@ const ChatPage = () => {
   const agent = getAgentById(Number.parseInt(agentId))
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   // State to manage chat history
   const [chatHistory, setChatHistory] = useState([
-    { id: "1", title: "hi", timestamp: "less than a minute ago" },
-    { id: "2", title: agent?.chatHistoryTitle || "Previous chat", timestamp: "2 days ago" },
-    { id: "3", title: "Market trend analysis", timestamp: "1 day ago" },
-    { id: "4", title: "Customer segmentation", timestamp: "about 12 hours ago" },
+    { id: "1", title: "New conversation", timestamp: "less than a minute ago" },
   ])
 
   // Initial messages
@@ -24,33 +24,10 @@ const ChatPage = () => {
     {
       id: "1",
       role: "assistant",
-      content: `Hi there! I'm the ${agent?.name}. How can I help you today?`,
-      timestamp: "less than a minute ago",
+      content: `Hi there! I'm the ${agent?.name}. How can I help you with ${agent?.language} today?`,
+      timestamp: new Date().toLocaleTimeString(),
     },
   ])
-
-  // Sample references
-  const references = [
-    {
-      id: "1",
-      title: `Understanding ${agent?.name.split(" ")[0]} Fundamentals`,
-      type: "youtube",
-      url: "https://youtube.com/watch?v=example1",
-    },
-    {
-      id: "2",
-      title: `10 Best Practices for ${agent?.name.split(" ")[0]} Visualization`,
-      type: "article",
-      source: `${agent?.name.split(" ")[0]} Science Journal`,
-      url: "https://example.com/best-practices",
-    },
-    {
-      id: "3",
-      title: `Advanced ${agent?.name.split(" ")[0]} Techniques`,
-      type: "youtube",
-      url: "https://youtube.com/watch?v=example2",
-    },
-  ]
 
   useEffect(() => {
     if (!agent) {
@@ -62,43 +39,104 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [agent, navigate, messages])
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault()
-    if (!inputValue.trim()) return
+    if (!inputValue.trim() || isLoading) return
+
+    setIsLoading(true)
 
     // Add user message
     const userMessage = {
       id: Date.now().toString(),
       role: "user",
       content: inputValue,
-      timestamp: "less than a minute ago",
+      timestamp: new Date().toLocaleTimeString(),
     }
 
-    setMessages([...messages, userMessage])
+    // Create a copy of current messages for history
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages)
     setInputValue("")
 
-    // Simulate agent response after a short delay
-    setTimeout(() => {
+    try {
+      // Get AI response from Gemini
+      const geminiResponse = await sendMessageToGemini(
+        agent.id, 
+        inputValue, 
+        updatedMessages.map(msg => ({ role: msg.role, content: msg.content }))
+      );
+
+      // Update chat history with first message if this is the first user message
+      if (messages.length === 1 && messages[0].role === "assistant") {
+        // Extract a title from the user's first message (limited to 30 chars)
+        const title = inputValue.length > 30 
+          ? inputValue.substring(0, 30) + "..." 
+          : inputValue;
+          
+        setChatHistory(prev => [{
+          id: Date.now().toString(),
+          title,
+          timestamp: new Date().toLocaleTimeString()
+        }, ...prev]);
+      }
+
+      // Fetch relevant resources from Tavily
+      const resources = await fetchResources(inputValue);
+      
+      // Process YouTube videos for embedding
+      const processedVideos = processYouTubeVideos(resources.videos);
+
+      // Add assistant response
       const assistantMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `As a ${agent.name}, I can help with that. Here's my analysis based on your request about "${inputValue}".`,
-        timestamp: "less than a minute ago",
-        references: references,
-      }
+        content: geminiResponse.text,
+        timestamp: new Date().toLocaleTimeString(),
+        references: [
+          ...resources.blogs.map(blog => ({
+            id: blog.id.toString(),
+            title: blog.title,
+            type: "article",
+            source: blog.source,
+            url: blog.url
+          })),
+          ...processedVideos.map(video => ({
+            id: video.id.toString(),
+            title: video.title,
+            type: "youtube",
+            url: video.url,
+            embedUrl: video.embedUrl,
+            thumbnailUrl: video.thumbnailUrl
+          }))
+        ]
+      };
 
-      setMessages((prev) => [...prev, assistantMessage])
-    }, 1000)
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("Error handling message:", error);
+      
+      // Add error message
+      const errorMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "I'm sorry, but I encountered an error while processing your request. Please try again.",
+        timestamp: new Date().toLocaleTimeString()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleNewChat = () => {
     // Create a new chat history entry
-    const newChatId = (chatHistory.length + 1).toString()
+    const newChatId = Date.now().toString();
     const newChatEntry = {
       id: newChatId,
-      title: "New Chat",
-      timestamp: "just now",
-    }
+      title: "New conversation",
+      timestamp: new Date().toLocaleTimeString()
+    };
 
     // Add new chat to history
     setChatHistory([newChatEntry, ...chatHistory])
@@ -108,8 +146,8 @@ const ChatPage = () => {
       {
         id: "1",
         role: "assistant",
-        content: `Hi there! I'm the ${agent?.name}. How can I help you today?`,
-        timestamp: "less than a minute ago",
+        content: `Hi there! I'm the ${agent?.name}. How can I help you with ${agent?.language} today?`,
+        timestamp: new Date().toLocaleTimeString(),
       },
     ])
   }
@@ -123,11 +161,11 @@ const ChatPage = () => {
         <div className="p-4 border-b border-orange-100 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-              <img src={agent.avatar || "/placeholder.svg"} alt={agent.name} className="rounded-full w-8 h-8" />
+              <img src={agent.avatar} alt={agent.name} className="rounded-full w-10 h-10 object-cover" />
             </div>
             <div>
               <h2 className="font-medium">{agent.name}</h2>
-              <p className="text-xs text-gray-500 truncate max-w-[200px]">{agent.description}</p>
+              <p className="text-xs text-gray-500 truncate max-w-[200px]">{agent.shortDescription}</p>
             </div>
           </div>
           <button 
@@ -162,7 +200,7 @@ const ChatPage = () => {
           </button>
           <div className="flex items-center">
             <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3">
-              <img src={agent.avatar || "/placeholder.svg"} alt={agent.name} className="rounded-full w-6 h-6" />
+              <img src={agent.avatar} alt={agent.name} className="rounded-full w-8 h-8 object-cover" />
             </div>
             <div>
               <h2 className="font-medium text-sm">{agent.name}</h2>
@@ -178,7 +216,7 @@ const ChatPage = () => {
               <div className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                 {message.role === "assistant" && (
                   <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                    <img src={agent.avatar || "/placeholder.svg"} alt={agent.name} className="rounded-full w-6 h-6" />
+                    <img src={agent.avatar} alt={agent.name} className="rounded-full w-8 h-8 object-cover" />
                   </div>
                 )}
                 <div
@@ -200,7 +238,7 @@ const ChatPage = () => {
               </div>
 
               {/* References */}
-              {message.references && (
+              {message.references && message.references.length > 0 && (
                 <div className="ml-14 mt-4">
                   <p className="text-sm text-gray-600 mb-2">References</p>
                   <div className="space-y-2">
@@ -214,7 +252,15 @@ const ChatPage = () => {
                       >
                         <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                           {reference.type === "youtube" ? (
-                            <Youtube size={24} className="text-orange-500" />
+                            reference.thumbnailUrl ? (
+                              <img 
+                                src={reference.thumbnailUrl} 
+                                alt={reference.title} 
+                                className="w-12 h-12 object-cover rounded-lg"
+                              />
+                            ) : (
+                              <Youtube size={24} className="text-orange-500" />
+                            )
                           ) : (
                             <ExternalLink size={24} className="text-orange-500" />
                           )}
@@ -229,11 +275,46 @@ const ChatPage = () => {
                       </a>
                     ))}
                   </div>
+
+                  {/* YouTube Embeds - Limited to max 2 */}
+                  {message.references.filter(ref => ref.type === "youtube" && ref.embedUrl).length > 0 && (
+                    <div className="mt-4 space-y-4">
+                      {message.references
+                        .filter(ref => ref.type === "youtube" && ref.embedUrl)
+                        .slice(0, 2) // Limit to max 2 videos
+                        .map(video => (
+                          <div key={`embed-${video.id}`} className="rounded-lg overflow-hidden border border-orange-100">
+                            <iframe
+                              width="100%"
+                              height="200"
+                              src={video.embedUrl}
+                              title={video.title}
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            ></iframe>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           ))}
           <div ref={messagesEndRef} />
+          
+          {/* Loading indicator - Simple version */}
+          {isLoading && (
+            <div className="flex justify-start mb-6">
+              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <img src={agent.avatar} alt={agent.name} className="rounded-full w-8 h-8 object-cover" />
+              </div>
+              <div className="bg-white border border-orange-100 rounded-lg p-4">
+                Thinking...
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Input area */}
@@ -243,13 +324,18 @@ const ChatPage = () => {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder={`Ask ${agent.name} something...`}
+              placeholder={`Ask about ${agent.language}...`}
               className="flex-1 p-3 rounded-l-lg border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              disabled={isLoading}
             />
             <button
               type="submit"
-              className="p-3 rounded-r-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-              disabled={!inputValue.trim()}
+              disabled={!inputValue.trim() || isLoading}
+              className={`p-3 rounded-r-lg ${
+                !inputValue.trim() || isLoading
+                  ? "bg-gray-200 text-gray-500"
+                  : "bg-orange-500 text-white hover:bg-orange-600"
+              }`}
             >
               <Send size={20} />
             </button>
