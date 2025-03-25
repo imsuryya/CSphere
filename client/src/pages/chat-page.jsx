@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useRef, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Send, ExternalLink, Youtube, User, Plus } from "lucide-react"
