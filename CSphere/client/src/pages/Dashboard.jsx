@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Moon, User } from "lucide-react"
+import { Search, User } from "lucide-react"
 import { agents, filterAgents } from "../data/agents"
 
 const Dashboard = () => {
@@ -20,10 +20,6 @@ const Dashboard = () => {
     }
   }
 
-  const handleLogout = () => {
-    // Implement logout logic
-    console.log("Logging out")
-  }
 
   const handleSelectAgent = (agentId) => {
     navigate(`/chat/${agentId}`)
@@ -49,9 +45,6 @@ const Dashboard = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="p-2 rounded-full hover:bg-orange-100">
-            <Moon size={20} className="text-gray-700" />
-          </button>
           <button className="p-2 rounded-full hover:bg-orange-100">
             <User size={20} className="text-gray-700" />
           </button>

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Send, ExternalLink, Youtube, User } from "lucide-react"
+import { ArrowLeft, Send, ExternalLink, Youtube, User, Plus } from "lucide-react"
 import { getAgentById } from "../data/agents"
 
 const ChatPage = () => {
@@ -11,6 +11,14 @@ const ChatPage = () => {
   const agent = getAgentById(Number.parseInt(agentId))
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef(null)
+
+  // State to manage chat history
+  const [chatHistory, setChatHistory] = useState([
+    { id: "1", title: "hi", timestamp: "less than a minute ago" },
+    { id: "2", title: agent?.chatHistoryTitle || "Previous chat", timestamp: "2 days ago" },
+    { id: "3", title: "Market trend analysis", timestamp: "1 day ago" },
+    { id: "4", title: "Customer segmentation", timestamp: "about 12 hours ago" },
+  ])
 
   // Initial messages
   const [messages, setMessages] = useState([
@@ -21,14 +29,6 @@ const ChatPage = () => {
       timestamp: "less than a minute ago",
     },
   ])
-
-  // Sample chat history
-  const chatHistory = [
-    { id: "1", title: "hi", timestamp: "less than a minute ago" },
-    { id: "2", title: agent?.chatHistoryTitle || "Previous chat", timestamp: "2 days ago" },
-    { id: "3", title: "Market trend analysis", timestamp: "1 day ago" },
-    { id: "4", title: "Customer segmentation", timestamp: "about 12 hours ago" },
-  ]
 
   // Sample references
   const references = [
@@ -92,13 +92,36 @@ const ChatPage = () => {
     }, 1000)
   }
 
+  const handleNewChat = () => {
+    // Create a new chat history entry
+    const newChatId = (chatHistory.length + 1).toString()
+    const newChatEntry = {
+      id: newChatId,
+      title: "New Chat",
+      timestamp: "just now",
+    }
+
+    // Add new chat to history
+    setChatHistory([newChatEntry, ...chatHistory])
+
+    // Reset messages to initial state
+    setMessages([
+      {
+        id: "1",
+        role: "assistant",
+        content: `Hi there! I'm the ${agent?.name}. How can I help you today?`,
+        timestamp: "less than a minute ago",
+      },
+    ])
+  }
+
   if (!agent) return null
 
   return (
     <div className="flex h-[calc(100vh-0px)]">
       {/* Sidebar with chat history */}
       <div className="w-80 border-r border-orange-100 bg-white hidden md:block">
-        <div className="p-4 border-b border-orange-100">
+        <div className="p-4 border-b border-orange-100 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
               <img src={agent.avatar || "/placeholder.svg"} alt={agent.name} className="rounded-full w-8 h-8" />
@@ -108,6 +131,13 @@ const ChatPage = () => {
               <p className="text-xs text-gray-500 truncate max-w-[200px]">{agent.description}</p>
             </div>
           </div>
+          <button 
+            onClick={handleNewChat} 
+            className="p-2 rounded-full hover:bg-orange-100 transition-colors"
+            title="Start New Chat"
+          >
+            <Plus size={20} className="text-orange-500" />
+          </button>
         </div>
 
         <div className="overflow-y-auto h-[calc(100%-73px)]">
