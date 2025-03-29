@@ -29,28 +29,10 @@ You are specialized in ${agent?.language} programming. If a user asks about a di
 
 VERY IMPORTANT: When showing code examples, you MUST format them with proper syntax highlighting following these rules:
 1. Always wrap code blocks in triple backticks with the language specified
-2. For JavaScript/TypeScript, use \`\`\`javascript
+2. Format code like \`\`\`${agent?.language.toLowerCase()}\n// Your code here\n\`\`\`
 3. The code must be clean, well-indented, and include helpful comments
-4. Format your response as if you're writing for a programming IDE or documentation
-
-Example of properly formatted code:
-
-\`\`\`javascript
-// Function to add two numbers
-function add(a, b) {
-  // Ensure inputs are numbers
-  if (typeof a !== 'number' || typeof b !== 'number') {
-    throw new Error('Both arguments must be numbers');
-  }
-  
-  // Return the sum
-  return a + b;
-}
-
-// Example usage
-const result = add(5, 3);
-console.log(result); // 8
-\`\`\`
+4. Use proper markdown formatting for all your responses
+5. Format your response as if you're writing for a programming documentation
 
 Keep your explanations concise but complete, with code examples that demonstrate best practices.
 `;
@@ -119,4 +101,4 @@ Keep your explanations concise but complete, with code examples that demonstrate
       references: []
     };
   }
-}; 
+};

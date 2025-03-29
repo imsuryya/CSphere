@@ -5,6 +5,26 @@ import { ArrowLeft, Send, ExternalLink, Youtube, User, Plus } from "lucide-react
 import { getAgentById } from "../data/agents"
 import { sendMessageToGemini } from "../services/geminiService"
 import { fetchResources, processYouTubeVideos } from "../services/tavilyService"
+import ReactMarkdown from 'react-markdown'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { ErrorBoundary } from 'react-error-boundary'
+
+// Error fallback component
+const ErrorFallback = ({ error, resetErrorBoundary }) => {
+  return (
+    <div className="p-4 bg-red-50 border border-red-300 rounded-lg">
+      <h3 className="text-red-700 font-medium">Something went wrong:</h3>
+      <p className="text-sm text-red-600">{error.message}</p>
+      <button 
+        onClick={resetErrorBoundary} 
+        className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+      >
+        Try again
+      </button>
+    </div>
+  )
+}
 
 const ChatPage = () => {
   const { agentId } = useParams()
@@ -24,7 +44,7 @@ const ChatPage = () => {
     {
       id: "1",
       role: "assistant",
-      content: `Hi there! I'm the ${agent?.name}. How can I help you with ${agent?.language} today?`,
+      content: agent ? `Hi there! I'm the ${agent.name}. How can I help you with ${agent.language} today?` : "Welcome! How can I help you?",
       timestamp: new Date().toLocaleTimeString(),
     },
   ])
@@ -84,7 +104,8 @@ const ChatPage = () => {
       const resources = await fetchResources(inputValue);
       
       // Process YouTube videos for embedding
-      const processedVideos = processYouTubeVideos(resources.videos);
+      const processedVideos = resources && resources.videos ? 
+        processYouTubeVideos(resources.videos) : [];
 
       // Add assistant response
       const assistantMessage = {
@@ -93,13 +114,13 @@ const ChatPage = () => {
         content: geminiResponse.text,
         timestamp: new Date().toLocaleTimeString(),
         references: [
-          ...resources.blogs.map(blog => ({
+          ...(resources && resources.blogs ? resources.blogs.map(blog => ({
             id: blog.id.toString(),
             title: blog.title,
             type: "article",
             source: blog.source,
             url: blog.url
-          })),
+          })) : []),
           ...processedVideos.map(video => ({
             id: video.id.toString(),
             title: video.title,
@@ -146,10 +167,43 @@ const ChatPage = () => {
       {
         id: "1",
         role: "assistant",
-        content: `Hi there! I'm the ${agent?.name}. How can I help you with ${agent?.language} today?`,
+        content: agent ? `Hi there! I'm the ${agent.name}. How can I help you with ${agent.language} today?` : "Welcome! How can I help you?",
         timestamp: new Date().toLocaleTimeString(),
       },
     ])
+  }
+
+  // Custom renderer for code blocks - fixed to avoid className issues
+  const renderers = {
+    code({inline, className, children, ...props}) {
+      const match = /language-(\w+)/.exec(className || '')
+      return !inline && match ? (
+        <SyntaxHighlighter
+          style={atomDark}
+          language={match[1]}
+          PreTag="div"
+          {...props}
+        >
+          {String(children).replace(/\n$/, '')}
+        </SyntaxHighlighter>
+      ) : (
+        <code {...props}>
+          {children}
+        </code>
+      )
+    },
+    // Ensure no className is passed to html elements that might not accept it
+    p: ({children}) => <p>{children}</p>,
+    h1: ({children}) => <h1>{children}</h1>,
+    h2: ({children}) => <h2>{children}</h2>,
+    h3: ({children}) => <h3>{children}</h3>,
+    h4: ({children}) => <h4>{children}</h4>,
+    h5: ({children}) => <h5>{children}</h5>,
+    h6: ({children}) => <h6>{children}</h6>,
+    ul: ({children}) => <ul>{children}</ul>,
+    ol: ({children}) => <ol>{children}</ol>,
+    li: ({children}) => <li>{children}</li>,
+    blockquote: ({children}) => <blockquote>{children}</blockquote>
   }
 
   if (!agent) return null
@@ -224,7 +278,22 @@ const ChatPage = () => {
                     message.role === "user" ? "bg-orange-500 text-white ml-3" : "bg-white border border-orange-100"
                   }`}
                 >
-                  {message.content}
+                  {message.role === "assistant" ? (
+                    <ErrorBoundary
+                      FallbackComponent={ErrorFallback}
+                      onReset={() => {
+                        // Reset the component state here if needed
+                      }}
+                    >
+                      <div className="prose prose-sm max-w-none">
+                        <ReactMarkdown components={renderers}>
+                          {message.content}
+                        </ReactMarkdown>
+                      </div>
+                    </ErrorBoundary>
+                  ) : (
+                    message.content
+                  )}
                 </div>
                 {message.role === "user" && (
                   <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
@@ -237,10 +306,10 @@ const ChatPage = () => {
                 {message.timestamp}
               </div>
 
-              {/* References */}
+              {/* References - Show only if they exist and not empty */}
               {message.references && message.references.length > 0 && (
                 <div className="ml-14 mt-4">
-                  <p className="text-sm text-gray-600 mb-2">References</p>
+                  <p className="text-sm font-medium text-gray-600 mb-2">Related Resources</p>
                   <div className="space-y-2">
                     {message.references.map((reference) => (
                       <a
@@ -324,7 +393,7 @@ const ChatPage = () => {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder={`Ask about ${agent.language}...`}
+              placeholder={`Ask about ${agent?.language || 'coding'}...`}
               className="flex-1 p-3 rounded-l-lg border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-300"
               disabled={isLoading}
             />
@@ -347,4 +416,3 @@ const ChatPage = () => {
 }
 
 export default ChatPage
-
