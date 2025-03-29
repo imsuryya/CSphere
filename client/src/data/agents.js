@@ -5,7 +5,7 @@ export const agents = [
     name: "JavaScript Expert",
     shortDescription: "Frontend & Node.js specialist",
     description: "Specializes in JavaScript, React, Node.js, and modern web development",
-    avatar: "https://storage.googleapis.com/pai-images/a1dd38cb602d4dddb1e2248641863c4f.jpeg",
+    avatar: "/agent-profile/JavaScript.png",
     chatHistoryTitle: "React component optimization",
     language: "JavaScript"
   },
@@ -14,25 +14,25 @@ export const agents = [
     name: "Python Developer",
     shortDescription: "Data science & backend",
     description: "Expert in Python for data science, machine learning, and backend development",
-    avatar: "https://storage.googleapis.com/pai-images/7f3fd98fa66343a1be8a30d1e8d38130.jpeg",
+    avatar: "/agent-profile/python.jpg",
     chatHistoryTitle: "Data analysis script",
     language: "Python"
   },
   {
     id: 3,
-    name: "Java Architect",
-    shortDescription: "Enterprise applications",
-    description: "Specializes in Java, Spring Boot, and enterprise application architecture",
-    avatar: "https://storage.googleapis.com/pai-images/9be88a30bf9447caa01d7a8d04f8c764.jpeg",
-    chatHistoryTitle: "Spring Boot API design",
-    language: "Java"
+    name: "C Engineer",
+    shortDescription: "Performance-critical systems",
+    description: "Expert in C for systems programming and performance-critical applications",
+    avatar: "/agent-profile/C.jpg",
+    chatHistoryTitle: "Memory optimization",
+    language: "C"
   },
   {
     id: 4,
-    name: "C/C++ Engineer",
+    name: "C++ Engineer",
     shortDescription: "Performance-critical systems",
-    description: "Expert in C/C++ for systems programming and performance-critical applications",
-    avatar: "https://storage.googleapis.com/pai-images/45e0c8cea5e243ac910b23f4d33f82fe.jpeg",
+    description: "Expert in C++ for systems programming and performance-critical applications",
+    avatar: "/agent-profile/CPP.jpg",
     chatHistoryTitle: "Memory optimization",
     language: "C++"
   },
@@ -41,7 +41,7 @@ export const agents = [
     name: "Go Developer",
     shortDescription: "Microservices & concurrency",
     description: "Specializes in Go for microservices, APIs, and concurrent programming",
-    avatar: "https://storage.googleapis.com/pai-images/d3c2cecd5e0e4c65875b6d6bf3e8d6e5.jpeg",
+    avatar: "/agent-profile/GO.jpg",
     chatHistoryTitle: "Concurrency pattern",
     language: "Go"
   },
@@ -50,7 +50,7 @@ export const agents = [
     name: "Ruby on Rails Expert",
     shortDescription: "Rapid web development",
     description: "Expert in Ruby and Rails for rapid web application development",
-    avatar: "https://storage.googleapis.com/pai-images/dc27e1bf3cb1456cb98c4263e864c1b0.jpeg",
+    avatar: "/agent-profile/Ruby.png",
     chatHistoryTitle: "Rails ActiveRecord query",
     language: "Ruby"
   },
