@@ -21,10 +21,14 @@ export const Navbar = () => {
             </Link>
           </nav>
           <div className="flex items-center space-x-3">
-            <Button variant="outline" className="h-9 border-orange-200 text-orange-500 hover:bg-orange-50">
-              Log in
-            </Button>
-            <Button className="h-9 bg-orange-500 text-white hover:bg-orange-600">Sign up</Button>
+            <Link href="https://csphere-five.vercel.app/">
+              <Button variant="outline" className="h-9 border-orange-200 text-orange-500 hover:bg-orange-50">
+                Log in
+              </Button>
+            </Link>
+            <Link href="https://csphere-five.vercel.app/">
+              <Button className="h-9 bg-orange-500 text-white hover:bg-orange-600">Sign up</Button>
+            </Link>
           </div>
         </div>
       </div>
