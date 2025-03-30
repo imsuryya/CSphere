@@ -1,18 +1,35 @@
 "use client"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { getAgentById } from "../data/agents"
 import ChatSidebar from "../components/chat/ChatSidebar"
 import ChatHeader from "../components/chat/ChatHeader"
-import ChatMessages from "../components/chat/ChatMessage" // Fixed import
+import ChatMessages from "../components/chat/ChatMessage"
 import ChatInput from "../components/chat/ChatInput"
 import useChat from "../hooks/useChat"
 import useChatHistory from "../hooks/useChatHistory"
+import { auth } from "../firebase/config"
 
 const ChatPage = () => {
   const { agentId } = useParams()
   const navigate = useNavigate()
   const agent = getAgentById(Number.parseInt(agentId))
+  const [activeChatId, setActiveChatId] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  
+  // Check authentication status
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        setIsAuthenticated(true)
+      } else {
+        setIsAuthenticated(false)
+        navigate("/login")
+      }
+    })
+    
+    return () => unsubscribe()
+  }, [navigate])
   
   const { 
     messages, 
@@ -20,7 +37,8 @@ const ChatPage = () => {
     isLoading,
     setInputValue,
     handleSendMessage,
-    messagesEndRef
+    messagesEndRef,
+    currentUser
   } = useChat(agent)
   
   const {
@@ -38,7 +56,38 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [agent, navigate, messages, messagesEndRef])
 
-  if (!agent) return null
+  const handleChatSelect = (chatId) => {
+    if (currentUser && agent) {
+      // Set the active chat ID
+      setActiveChatId(chatId)
+      
+      // Clear the current messages from state
+      // This will trigger useChat's useEffect to load the selected chat
+      // We're using a technique that forces the chat to reload
+      localStorage.setItem(`current_chat_${currentUser.uid}`, chatId)
+      
+      // Force a reload of the component
+      window.location.reload()
+    }
+  }
+
+  const startNewChat = () => {
+    if (currentUser && agent) {
+      // Create a new chat and get its ID
+      const newChatId = handleNewChat()
+      
+      // Set it as active
+      if (newChatId) {
+        setActiveChatId(newChatId)
+        localStorage.setItem(`current_chat_${currentUser.uid}`, newChatId)
+        
+        // Force a reload of the component to clear messages
+        window.location.reload()
+      }
+    }
+  }
+
+  if (!agent || !isAuthenticated) return null
 
   return (
     <div className="flex h-[calc(100vh-0px)]">
@@ -46,7 +95,9 @@ const ChatPage = () => {
       <ChatSidebar 
         agent={agent}
         chatHistory={chatHistory}
-        handleNewChat={handleNewChat}
+        handleNewChat={startNewChat}
+        onChatSelect={handleChatSelect}
+        activeChatId={activeChatId}
       />
 
       {/* Main chat area */}
