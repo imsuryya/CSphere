@@ -1,25 +1,14 @@
+import { siteContent } from "@/lib/content"
+
 export const FeaturesSection = () => {
-  const features = [
-    {
-      title: "Seamless Integration",
-      description: "Connect with your favorite tools and services without any hassle.",
-    },
-    {
-      title: "Advanced Analytics",
-      description: "Gain valuable insights with our comprehensive analytics dashboard.",
-    },
-    {
-      title: "Secure & Reliable",
-      description: "Your data is protected with enterprise-grade security measures.",
-    },
-  ]
+  const features = siteContent.features.items
 
   return (
     <section id="features" className="py-16 md:py-24">
       <div className="container px-4 md:px-6">
         <div className="mx-auto max-w-6xl">
           <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 md:text-4xl">
-            Features that make a difference
+            {siteContent.features.title}
           </h2>
           <div className="grid gap-8 md:grid-cols-3">
             {features.map((feature, index) => (
@@ -37,3 +26,4 @@ export const FeaturesSection = () => {
     </section>
   )
 }
+

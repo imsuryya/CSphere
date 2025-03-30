@@ -1,3 +1,5 @@
+import { siteContent } from "@/lib/content"
+
 export const AboutSection = () => {
   return (
     <section id="about" className="py-16 md:py-24 bg-white/50">
@@ -5,15 +7,15 @@ export const AboutSection = () => {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
-              <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">About CSphere</h2>
-              <p className="mb-6 text-lg text-gray-600">
-                CSphere was founded with a simple mission: to create tools that simplify complex workflows. Our team
-                of experts is dedicated to building solutions that help businesses thrive in the digital age.
-              </p>
-              <p className="text-lg text-gray-600">
-                With years of industry experience, we understand the challenges you face and are committed to
-                providing innovative solutions that address your specific needs.
-              </p>
+              <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">{siteContent.about.title}</h2>
+              {siteContent.about.paragraphs.map((paragraph, index) => (
+                <p
+                  key={index}
+                  className={`${index < siteContent.about.paragraphs.length - 1 ? "mb-6" : ""} text-lg text-gray-600`}
+                >
+                  {paragraph}
+                </p>
+              ))}
             </div>
             <div className="rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 p-1">
               <div className="aspect-video rounded-lg bg-white/80 flex items-center justify-center">
@@ -26,3 +28,4 @@ export const AboutSection = () => {
     </section>
   )
 }
+
