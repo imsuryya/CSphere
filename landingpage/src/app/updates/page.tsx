@@ -51,7 +51,7 @@ export default function UpdatesPage() {
               <CardContent>
                 <div className="space-y-4">
                   <p className="text-gray-600">
-                    We've integrated Gemini AI to power our specialized chatbots, providing more accurate and helpful
+                    We&apos;ve integrated Gemini AI to power our specialized chatbots, providing more accurate and helpful
                     responses for CS students. This update significantly improves the quality of answers and enables
                     more natural conversations.
                   </p>
@@ -142,7 +142,7 @@ export default function UpdatesPage() {
               <CardContent>
                 <div className="space-y-4">
                   <p className="text-gray-600">
-                    Our platform now suggests relevant YouTube tutorials and lectures based on the topics you're
+                    Our platform now suggests relevant YouTube tutorials and lectures based on the topics you&apos;re
                     studying. This feature helps visual learners and provides alternative explanations for complex
                     concepts.
                   </p>
@@ -272,7 +272,7 @@ export default function UpdatesPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  Google's Gemini AI provides the foundation for our specialized chatbots, enabling natural
+                  Google&apos;s Gemini AI provides the foundation for our specialized chatbots, enabling natural
                   conversations and accurate responses to complex CS questions.
                 </p>
                 <Link
@@ -297,7 +297,7 @@ export default function UpdatesPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  Tavily's search API helps us find and recommend the most relevant and up-to-date resources for your CS
+                  Tavily&apos;s search API helps us find and recommend the most relevant and up-to-date resources for your CS
                   learning journey.
                 </p>
                 <Link

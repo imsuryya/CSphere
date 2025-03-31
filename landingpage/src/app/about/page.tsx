@@ -41,7 +41,7 @@ export default function AboutPage() {
                 guide their learning journey.
               </p>
               <p className="text-gray-600 leading-relaxed">
-                By combining the power of advanced AI models like Gemini with educational expertise, we've created a
+                By combining the power of advanced AI models like Gemini with educational expertise, we&apos;ve created a
                 platform that provides personalized, on-demand assistance across the entire CS curriculum.
               </p>
             </div>
@@ -252,7 +252,7 @@ export default function AboutPage() {
         <div className="rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 p-8 text-center shadow-sm">
           <h2 className="mb-4 text-2xl font-bold text-gray-900">Get in Touch</h2>
           <p className="mb-6 text-gray-600">
-            Have questions or want to learn more about CSphere? We'd love to hear from you!
+            Have questions or want to learn more about CSphere? We&apos;d love to hear from you!
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="mailto:info@csphere.com">
