@@ -30,10 +30,13 @@ const ChatSidebar = ({ agent, chatHistory, handleNewChat, onChatSelect, activeCh
         </button>
       </div>
 
-      <ChatHistory chatHistory={chatHistory} onChatSelect={onChatSelect} activeChatId={activeChatId} />
+      <ChatHistory 
+        chatHistory={chatHistory} 
+        onChatSelect={onChatSelect} 
+        activeChatId={activeChatId} 
+      />
     </div>
   )
 }
 
 export default ChatSidebar
-

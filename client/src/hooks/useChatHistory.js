@@ -1,12 +1,21 @@
 import { useState, useEffect } from "react";
-import { auth } from "../firebase/config";
+import { auth, db } from "../firebase/config";
+import { 
+  collection, 
+  query, 
+  where, 
+  orderBy, 
+  getDocs, 
+  doc,
+  updateDoc,
+  serverTimestamp 
+} from "firebase/firestore";
 
-const HISTORY_KEY_PREFIX = "chat_history_";
-
-const useChatHistory = (messages, agent) => {
+const useChatHistory = (agent) => {
   // State to manage chat history
   const [chatHistory, setChatHistory] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [activeChatId, setActiveChatId] = useState(null);
 
   // Set current user from auth
   useEffect(() => {
@@ -24,104 +33,42 @@ const useChatHistory = (messages, agent) => {
     return () => unsubscribe();
   }, []);
   
-  const loadUserChatHistory = (userId) => {
+  const loadUserChatHistory = async (userId) => {
     if (!userId) return;
     
-    const historyKey = `${HISTORY_KEY_PREFIX}${userId}`;
-    const savedHistory = localStorage.getItem(historyKey);
-    
-    if (savedHistory) {
-      try {
-        setChatHistory(JSON.parse(savedHistory));
-      } catch (e) {
-        console.error("Error parsing saved chat history:", e);
-        setChatHistory([{ 
-          id: "default", 
-          agentId: agent?.id, 
-          title: "New conversation", 
-          timestamp: new Date().toLocaleTimeString() 
-        }]);
-      }
-    } else {
-      // Initialize with a default chat if none exists
-      setChatHistory([{ 
-        id: "default", 
-        agentId: agent?.id, 
-        title: "New conversation", 
-        timestamp: new Date().toLocaleTimeString() 
-      }]);
-    }
-  };
-  
-  const saveUserChatHistory = () => {
-    if (!currentUser) return;
-    
-    const historyKey = `${HISTORY_KEY_PREFIX}${currentUser.uid}`;
-    localStorage.setItem(historyKey, JSON.stringify(chatHistory));
-  };
-
-  // Save chat history whenever it changes
-  useEffect(() => {
-    if (currentUser && chatHistory.length > 0) {
-      saveUserChatHistory();
-    }
-  }, [chatHistory, currentUser]);
-
-  useEffect(() => {
-    // Update chat history with first message if this is the first user message
-    if (
-      currentUser &&
-      agent &&
-      messages.length >= 2 && 
-      messages[0].role === "assistant" && 
-      messages[1].role === "user"
-    ) {
-      const userMessage = messages[1];
-      
-      // Extract a title from the user's first message (limited to 30 chars)
-      const title = userMessage.content.length > 30 
-        ? userMessage.content.substring(0, 30) + "..." 
-        : userMessage.content;
-      
-      // Check if this chat already exists in history
-      const existingChatIndex = chatHistory.findIndex(
-        chat => chat.id === `${currentUser.uid}_${agent.id}`
+    try {
+      const chatsRef = collection(db, "chatHistory");
+      const q = query(
+        chatsRef,
+        where("userId", "==", userId),
+        orderBy("updatedAt", "desc")  // Sort by last updated
       );
       
-      if (existingChatIndex === -1) {
-        // Add new chat to history
-        const newChat = {
-          id: `${currentUser.uid}_${agent.id}`,
-          agentId: agent.id,
-          title,
-          timestamp: new Date().toLocaleTimeString()
-        };
-        
-        setChatHistory(prev => [newChat, ...prev]);
+      const querySnapshot = await getDocs(q);
+      const chats = [];
+      
+      querySnapshot.forEach((doc) => {
+        chats.push({
+          id: doc.id,
+          ...doc.data(),
+          timestamp: doc.data().updatedAt?.toDate()?.toLocaleTimeString() || new Date().toLocaleTimeString()
+        });
+      });
+      
+      setChatHistory(chats);
+      
+      // Set the most recent chat as active
+      if (chats.length > 0) {
+        setActiveChatId(chats[0].id);
       }
+    } catch (error) {
+      console.error("Error loading chat history:", error);
+      setChatHistory([]);
     }
-  }, [messages, agent, currentUser, chatHistory]);
+  };
 
-  const handleNewChat = () => {
-    if (!currentUser || !agent) return;
-    
-    // Create a new chat history entry with a unique ID
-    const newChatId = `${currentUser.uid}_${agent.id}_${Date.now()}`;
-    const newChatEntry = {
-      id: newChatId,
-      agentId: agent.id,
-      title: "New conversation",
-      timestamp: new Date().toLocaleTimeString()
-    };
-
-    // Add new chat to history
-    setChatHistory(prev => [newChatEntry, ...prev]);
-    
-    // Clear current messages (this should trigger a new chat load)
-    localStorage.removeItem(`chat_${currentUser.uid}_${agent.id}`);
-    
-    // Return the new chat ID so the parent component can use it
-    return newChatId;
+  const onChatSelect = (chatId) => {
+    setActiveChatId(chatId);
   };
 
   // Filter chat history to only show chats for the current agent
@@ -131,8 +78,8 @@ const useChatHistory = (messages, agent) => {
 
   return {
     chatHistory: filteredChatHistory,
-    setChatHistory,
-    handleNewChat,
+    activeChatId,
+    onChatSelect,
     currentUser
   };
 };

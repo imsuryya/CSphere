@@ -29,4 +29,3 @@ const ChatHistory = ({ chatHistory, onChatSelect, activeChatId }) => {
 }
 
 export default ChatHistory
-

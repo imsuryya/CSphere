@@ -14,9 +14,8 @@ const ChatPage = () => {
   const { agentId } = useParams()
   const navigate = useNavigate()
   const agent = getAgentById(Number.parseInt(agentId))
-  const [activeChatId, setActiveChatId] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Check authentication status
   useEffect(() => {
@@ -32,10 +31,25 @@ const ChatPage = () => {
     return () => unsubscribe()
   }, [navigate])
 
-  const { messages, inputValue, isLoading, setInputValue, handleSendMessage, messagesEndRef, currentUser } =
-    useChat(agent)
+  const {
+    messages,
+    inputValue,
+    isLoading,
+    setInputValue,
+    handleSendMessage,
+    messagesEndRef,
+    handleChatSelect,
+    handleNewChat,
+    activeChatId
+  } = useChat(agent);
 
-  const { chatHistory, handleNewChat } = useChatHistory(messages, agent)
+  const { chatHistory } = useChatHistory(agent);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
@@ -76,42 +90,10 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [agent, navigate, messages, messagesEndRef])
 
-  const handleChatSelect = (chatId) => {
-    if (currentUser && agent) {
-      // Set the active chat ID
-      setActiveChatId(chatId)
-
-      // Clear the current messages from state
-      localStorage.setItem(`current_chat_${currentUser.uid}`, chatId)
-
-      // Force a reload of the component
-      window.location.reload()
-
-      // Close sidebar on mobile after selection
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false)
-      }
-    }
-  }
-
-  const startNewChat = () => {
-    if (currentUser && agent) {
-      // Create a new chat and get its ID
-      const newChatId = handleNewChat()
-
-      // Set it as active
-      if (newChatId) {
-        setActiveChatId(newChatId)
-        localStorage.setItem(`current_chat_${currentUser.uid}`, newChatId)
-
-        // Force a reload of the component to clear messages
-        window.location.reload()
-
-        // Close sidebar on mobile after creating new chat
-        if (window.innerWidth < 768) {
-          setSidebarOpen(false)
-        }
-      }
+  const startNewChat = async () => {
+    const newChatId = await handleNewChat();
+    if (newChatId && window.innerWidth < 768) {
+      setSidebarOpen(false);
     }
   }
 
@@ -167,4 +149,3 @@ const ChatPage = () => {
 }
 
 export default ChatPage
-
