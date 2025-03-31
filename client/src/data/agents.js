@@ -59,7 +59,7 @@ export const agents = [
     name: "Java Programmer",
     shortDescription: "OOP & enterprise applications",
     description: "Expert in Java, object-oriented programming, and enterprise application development",
-    avatar: "/agent-profile/Java.png",
+    avatar: "/agent-profile/java.png",
     chatHistoryTitle: "OOP design patterns",
     language: "Java"
   },
