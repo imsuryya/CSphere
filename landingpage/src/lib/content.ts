@@ -14,9 +14,9 @@ export const siteContent = {
     logo: "CSphere",
     links: [
       { text: "Features", href: "/features" },
-      { text: "About", href: "/about" },
+      { text: "About", href: "/about" },  // This path is now correct
       { text: "Contact", href: "#contact" },
-      { text: "Updates", href: "/updates" },
+      { text: "Updates", href: "/updates" },  // This path is now correct
     ],
     buttons: {
       login: "Log in",
@@ -80,11 +80,11 @@ export const siteContent = {
     sections: [
       {
         title: "Product",
-        links: [{ text: "Updates", href: "#" }],
+        links: [{ text: "Updates", href: "/updates" }],  // Updated to correct path
       },
       {
         title: "Company",
-        links: [{ text: "About", href: "#" }],
+        links: [{ text: "About", href: "/about" }],  // Updated to correct path
       },
       {
         title: "Legal",
@@ -94,4 +94,3 @@ export const siteContent = {
     copyright: `© ${new Date().getFullYear()} CSphere. All rights reserved.`,
   },
 }
-

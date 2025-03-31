@@ -14,35 +14,35 @@ export const ContactSection = () => {
           </h2>
           <div className="grid gap-12 md:grid-cols-2">
             <div>
-              <form className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="name" className="mb-2 block text-sm font-medium">
-                      Name
-                    </label>
-                    <Input id="name" placeholder="Your name" />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="mb-2 block text-sm font-medium">
-                      Email
-                    </label>
-                    <Input id="email" type="email" placeholder="Your email" />
-                  </div>
+            <form className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="name" className="mb-2 block text-sm font-medium">
+                    Name
+                  </label>
+                  <Input id="name" placeholder="Your name" />
                 </div>
                 <div>
-                  <label htmlFor="subject" className="mb-2 block text-sm font-medium">
-                    Subject
+                  <label htmlFor="email" className="mb-2 block text-sm font-medium">
+                    Email
                   </label>
-                  <Input id="subject" placeholder="How can we help?" />
+                  <Input id="email" type="email" placeholder="Your email" />
                 </div>
-                <div>
-                  <label htmlFor="message" className="mb-2 block text-sm font-medium">
-                    Message
-                  </label>
-                  <Textarea id="message" placeholder="Your message" rows={5} />
-                </div>
-                <Button className="w-full bg-orange-500 text-white hover:bg-orange-600">Send Message</Button>
-              </form>
+              </div>
+              <div>
+                <label htmlFor="subject" className="mb-2 block text-sm font-medium">
+                  Subject
+                </label>
+                <Input id="subject" placeholder="How can we help?" />
+              </div>
+              <div>
+                <label htmlFor="message" className="mb-2 block text-sm font-medium">
+                  Message
+                </label>
+                <Textarea id="message" placeholder="Your message" rows={5} className="resize-none" />
+              </div>
+              <Button className="w-full bg-orange-500 text-white hover:bg-orange-600">Send Message</Button>
+            </form>
             </div>
             <div className="space-y-6">
               <div>
