@@ -95,7 +95,7 @@ export const agents = [
     name: "Digital Logic Engineer",
     shortDescription: "Logic design & computer architecture",
     description: "Expert in digital logic fundamentals, boolean algebra, logic gates, and computer architecture",
-    avatar: "/agent-profile/DigitalLogic.png",
+    avatar: "/agent-profile/DLE.png",
     chatHistoryTitle: "Logic circuit minimization",
     language: "Digital Logic"
   },
@@ -104,7 +104,7 @@ export const agents = [
     name: "Discrete Mathematics Expert",
     shortDescription: "Mathematical foundations for CS",
     description: "Specialist in discrete mathematical structures, graph theory, combinatorics, and formal logic",
-    avatar: "/agent-profile/DiscreteMath.png",
+    avatar: "/agent-profile/DiscreteMath.jpg",
     chatHistoryTitle: "Graph algorithm explanation",
     language: "Discrete Mathematics"
   },
