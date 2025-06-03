@@ -27,7 +27,7 @@
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/csphere.git
+   git clone https://github.com/imsuryya/csphere.git
    cd csphere
 
 2. **To run the landing page**
